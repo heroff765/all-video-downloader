@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Downloader</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto">
+            <h1 class="text-4xl font-bold text-center mb-8 text-blue-600">Video Downloader</h1>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <form id="downloadForm" class="space-y-4">
+                    <div>
+                        <label for="url" class="block text-sm font-medium text-gray-700">Video URL</label>
+                        <input type="url" id="url" name="url" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            placeholder="Enter video URL here">
+                    </div>
+                    
+                    <button type="submit"
+                        class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        Download Video
+                    </button>
+                </form>
+
+                <div id="status" class="mt-4 hidden">
+                    <div class="animate-pulse flex items-center justify-center text-blue-600">
+                        <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Downloading...
+                    </div>
+                </div>
+
+                <div id="result" class="mt-4 hidden">
+                    <div class="p-4 rounded-md"></div>
+                </div>
+            </div>
+
+            <div class="mt-8 text-center text-sm text-gray-600">
+                <p>Supported platforms: YouTube, Vimeo, Facebook, Instagram, Twitter, and many more!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('downloadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const status = document.getElementById('status');
+            const result = document.getElementById('result');
+            const resultDiv = result.querySelector('div');
+            
+            status.classList.remove('hidden');
+            result.classList.add('hidden');
+            
+            try {
+                const formData = new FormData(e.target);
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.textContent = data.message;
+                    resultDiv.className = 'p-4 rounded-md bg-green-100 text-green-700';
+                } else {
+                    resultDiv.textContent = data.error;
+                    resultDiv.className = 'p-4 rounded-md bg-red-100 text-red-700';
+                }
+            } catch (error) {
+                resultDiv.textContent = 'An error occurred while downloading the video.';
+                resultDiv.className = 'p-4 rounded-md bg-red-100 text-red-700';
+            } finally {
+                status.classList.add('hidden');
+                result.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
